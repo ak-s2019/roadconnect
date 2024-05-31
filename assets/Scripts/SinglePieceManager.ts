@@ -1,4 +1,4 @@
-import { _decorator, CCBoolean, CCInteger, Component, find, Node, Sprite, SpriteFrame, Texture2D, Vec3 } from 'cc';
+import { _decorator, Button, CCBoolean, CCInteger, Component, find, Node, Sprite, SpriteFrame, Texture2D, tween, Vec3 } from 'cc';
 import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
@@ -34,6 +34,8 @@ export class SinglePieceManager extends Component {
         
     }
 
+
+   
     setupEmpty(){
         this.isEmpty = true;
     }
@@ -41,6 +43,7 @@ export class SinglePieceManager extends Component {
 
     setup(spriteImage: SpriteFrame, startRot: number, targetRot: number) {
 
+        this.node.setScale(0,0,0);
         this.mySprite.spriteFrame = spriteImage;
         this.startRotation = startRot;
 
@@ -59,6 +62,13 @@ export class SinglePieceManager extends Component {
             this.isBonus = true;
         }
 
+        let randomDelay =  Math.random() * (0.75 - 0.25);
+       tween(this.node).delay(randomDelay).to(0.25,{scale: new Vec3(1,1,1)},{easing: "quadInOut"}).start();
+
+    }
+
+    startTweenOut() {
+        tween(this.node).delay(0.2).to(0.4,{scale: new Vec3(0,0,0)},{easing: "quadInOut"}).start();
     }
 
     isCorrectPosition(){
@@ -92,11 +102,22 @@ export class SinglePieceManager extends Component {
 
     onClickPiece(){
        
-        this.node.setRotationFromEuler(new Vec3(this.node.eulerAngles.x,this.node.eulerAngles.y,this.node.eulerAngles.z+90));
+        this.getComponent(Button).interactable = false;
+        tween(this.node).by(0.25,{eulerAngles : new Vec3(0,0,-90)},{easing: "sineInOut", onComplete: ()=>{
+            let finalRot = this.node.eulerAngles.z;
+            if(finalRot<0)
+                finalRot = 360 + finalRot;
+            this.node.setRotationFromEuler(new Vec3(this.node.eulerAngles.x,this.node.eulerAngles.y,finalRot));
+            find("GameManager").getComponent(GameManager).checkForLeveLCompletion();
+            this.getComponent(Button).interactable = true;
+        }}).start();
+
+        /*this.node.setRotationFromEuler(new Vec3(this.node.eulerAngles.x,this.node.eulerAngles.y,this.node.eulerAngles.z+90));
         if(this.node.eulerAngles.z>=360)
             this.node.setRotationFromEuler(new Vec3(this.node.eulerAngles.x,this.node.eulerAngles.y,this.node.eulerAngles.z-360));
         //console.log(this.isCorrectPosition());
-        find("GameManager").getComponent(GameManager).checkForLeveLCompletion();
+        */
+        
     }
 
 }

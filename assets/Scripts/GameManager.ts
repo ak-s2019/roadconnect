@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, input, Input, EventTouch, CCInteger, instantiate, Layout, Prefab, Label, RichText } from 'cc';
+import { _decorator, Component, Node, input, Input, EventTouch, CCInteger, instantiate, Layout, Prefab, Label, RichText, tween, Vec3 } from 'cc';
 import { LevelData, Levels } from './LevelData';
 import { SingleLevelUiManager } from './SingleLevelUiManager';
 import { SinglePieceManager } from './SinglePieceManager';
@@ -50,6 +50,12 @@ export class GameManager extends Component {
     private currentLevel;
 
 
+    //animation items
+    @property({type:Node})
+    private  gameTitleRoad: Node;
+    @property({type:Node})
+    private  gameTitleConnect: Node;
+
     start() {
 
         //localStorage.clear()
@@ -65,9 +71,9 @@ export class GameManager extends Component {
         this.allLevelsCompleted.active = false;
 
       
-
-
-
+        tween(this.gameTitleRoad).to(0.5,{position : new Vec3(0,220,0)},{easing: "quadInOut"}).start();
+        tween(this.gameTitleConnect).delay(0.25).to(0.5,{position : new Vec3(0,140,0)},{easing: "quadInOut"}).start();
+        tween(this.playBtn).delay(0.5).to(0.5,{scale: new Vec3(1.5,1.5,1.5)},{easing: "quadInOut"}).start();
     }
 
     update(deltaTime: number) {
@@ -75,12 +81,20 @@ export class GameManager extends Component {
     } 
      
     playClicked() {
+
+
+        tween(this.playBtn).to(0.3,{scale: new Vec3(2,2,2)},{easing: "quadInOut"})
+        .to(0.3,{scale: new Vec3(1.5,1.5,1.5)},{easing: "quadInOut",onComplete: ()=>{
+            this.gameTitle.active = false;
+            this.playBtn.active = false;
+           
+        
+            this.createLevelSelectButtons();
+        }})
+        .start();
+
          // console.log("hi");
-          this.gameTitle.active = false;
-          this.playBtn.active = false;
-         
-      
-          this.createLevelSelectButtons();
+          
     }
 
     
@@ -154,6 +168,11 @@ export class GameManager extends Component {
         this.gamePieceLayout.node.active = true;
         this.gameLevelTitle.node.active = true;
         this.allLevelsCompleted.active = false;
+
+
+
+        tween(this.gameLevelTitle.node).to(0.5,{position : new Vec3(0,780,0)},{easing: "quadInOut"}).start();
+
     }
 
 
@@ -166,18 +185,33 @@ export class GameManager extends Component {
         if(allCorrect){
             console.log("LEVEL COMPLETED!");
            
-
+            this.allLevelsCompleted.setScale(0,0,0);
 
             if(this.levelsData.levelsData.length ==this.currentLevel+1 ) {
-                this.gamePieceLayout.node.active = false;
-                this.gameLevelTitle.node.active = false;
-                this.allLevelsCompleted.active = true;
+              
+                this.allSinglePieceManagers.forEach(singlePieceManager => {
+                    singlePieceManager.startTweenOut();
+                });
+                tween(this.gameLevelTitle.node).delay(0.2).to(0.5,{position : new Vec3(-800,780,0)},{easing: "quadInOut", onComplete: ()=>{
+                    this.gamePieceLayout.node.active = false;
+                    this.gameLevelTitle.node.active = false;
+                    this.allLevelsCompleted.active = true;
+                    tween(this.allLevelsCompleted).delay(0.15).to(0.25,{scale: new Vec3(1,1,1)},{easing: "quadInOut"}).start();
+                }}).start();
             }
             else {
                 let a = this.currentLevel+1;
                 console.log(a);
                 localStorage.setItem("level"+a,"ready");
-                this.openGameLevel(this.currentLevel+1);
+                this.allSinglePieceManagers.forEach(singlePieceManager => {
+                    singlePieceManager.startTweenOut();
+                });
+                tween(this.gameLevelTitle.node).delay(0.2).to(0.5,{position : new Vec3(-800,780,0)},{easing: "quadInOut", onComplete: ()=>{
+                    this.gameLevelTitle.node.setPosition(800,780,0);
+                    this.openGameLevel(this.currentLevel+1);
+                }}).start();
+
+                
             }
            
         }
