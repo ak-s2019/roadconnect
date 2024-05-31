@@ -63,7 +63,9 @@ export class SinglePieceManager extends Component {
         }
 
         let randomDelay =  Math.random() * (0.75 - 0.25);
-       tween(this.node).delay(randomDelay).to(0.25,{scale: new Vec3(1,1,1)},{easing: "quadInOut"}).start();
+       tween(this.node).delay(randomDelay).to(0.25,{scale: new Vec3(1,1,1)},{easing: "quadInOut", onStart: ()=>{
+        find("GameManager").getComponent(GameManager).audioManager.playPieceAppear();
+       }}).start();
 
     }
 
@@ -102,6 +104,8 @@ export class SinglePieceManager extends Component {
 
     onClickPiece(){
        
+        find("GameManager").getComponent(GameManager).audioManager.playPieceTurn();
+
         this.getComponent(Button).interactable = false;
         tween(this.node).by(0.25,{eulerAngles : new Vec3(0,0,-90)},{easing: "sineInOut", onComplete: ()=>{
             let finalRot = this.node.eulerAngles.z;

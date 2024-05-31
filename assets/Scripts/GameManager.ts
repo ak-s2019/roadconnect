@@ -2,10 +2,14 @@ import { _decorator, Component, Node, input, Input, EventTouch, CCInteger, insta
 import { LevelData, Levels } from './LevelData';
 import { SingleLevelUiManager } from './SingleLevelUiManager';
 import { SinglePieceManager } from './SinglePieceManager';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
 export class GameManager extends Component {
+
+    @property({type:AudioManager})
+    public audioManager: AudioManager;
 
     @property({type:Node})
     private  gameTitle: Node;
@@ -22,8 +26,8 @@ export class GameManager extends Component {
     @property({type:Node})
     private  gameplayPanel: Node;
    
-    @property({type:RichText})
-    private  gameLevelTitle: RichText;
+    @property({type:Label})
+    private  gameLevelTitle: Label;
 
     @property({type:Layout})
     private  gamePieceLayout: Layout;
@@ -82,9 +86,9 @@ export class GameManager extends Component {
      
     playClicked() {
 
-
-        tween(this.playBtn).to(0.3,{scale: new Vec3(2,2,2)},{easing: "quadInOut"})
-        .to(0.3,{scale: new Vec3(1.5,1.5,1.5)},{easing: "quadInOut",onComplete: ()=>{
+        this.audioManager.playButtonClick();
+        tween(this.playBtn).to(0.15,{scale: new Vec3(1.75,1.75,1.75)},{easing: "quadInOut"})
+        .to(0.15,{scale: new Vec3(1.5,1.5,1.5)},{easing: "quadInOut",onComplete: ()=>{
             this.gameTitle.active = false;
             this.playBtn.active = false;
            
@@ -101,6 +105,7 @@ export class GameManager extends Component {
 
     menuBtnClicked() {
        
+        this.audioManager.playButtonClick();
          this.gameplayPanel.active = false;
          this.createLevelSelectButtons();
     }
@@ -121,7 +126,7 @@ export class GameManager extends Component {
 
 
     isUnlocked(levelNum: number){
-        console.log(localStorage.getItem("level"+levelNum));
+        //console.log(localStorage.getItem("level"+levelNum));
         if(levelNum==0){
             return true;
         }
@@ -170,7 +175,7 @@ export class GameManager extends Component {
         this.allLevelsCompleted.active = false;
 
 
-
+        this.gameLevelTitle.node.setPosition(800,780,0);
         tween(this.gameLevelTitle.node).to(0.5,{position : new Vec3(0,780,0)},{easing: "quadInOut"}).start();
 
     }
@@ -183,8 +188,10 @@ export class GameManager extends Component {
                 allCorrect = false;
         });
         if(allCorrect){
-            console.log("LEVEL COMPLETED!");
+            //console.log("LEVEL COMPLETED!");
            
+            this.audioManager.playLeveLComplete();
+
             this.allLevelsCompleted.setScale(0,0,0);
 
             if(this.levelsData.levelsData.length ==this.currentLevel+1 ) {
@@ -201,7 +208,7 @@ export class GameManager extends Component {
             }
             else {
                 let a = this.currentLevel+1;
-                console.log(a);
+                //console.log(a);
                 localStorage.setItem("level"+a,"ready");
                 this.allSinglePieceManagers.forEach(singlePieceManager => {
                     singlePieceManager.startTweenOut();
