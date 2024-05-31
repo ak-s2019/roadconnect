@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Label, CCString, CCInteger, find } from 'cc';
+import { _decorator, Component, Node, Label, CCString, CCInteger, find, Button, Sprite, color } from 'cc';
 import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
@@ -26,10 +26,14 @@ export class SingleLevelUiManager extends Component {
         
     }
 
-    setup(levelnum: number) {
+    setup(levelnum: number, unlocked: boolean) {
         this.prefabLevel = levelnum;
         let a: number = this.prefabLevel+1;
         this.levelNumLabel.string = ""+a;
+        if(!unlocked){
+            this.getComponent(Button).interactable = false;
+            this.getComponent(Sprite).color =  color(128,128,128,255); 
+        }
     }
 
     openLevel() {

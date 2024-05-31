@@ -28,6 +28,9 @@ export class GameManager extends Component {
     @property({type:Layout})
     private  gamePieceLayout: Layout;
 
+    @property({type:Node})
+    private  allLevelsCompleted: Node;
+
     @property({type:Prefab})
     private  levelSelectPrefab: Prefab;
 
@@ -48,18 +51,20 @@ export class GameManager extends Component {
 
 
     start() {
+
+        //localStorage.clear()
+
+
+
+
         this.gameTitle.active = true;
         this.playBtn.active = true;
         this.levelSelectPanel.active = false;
         this.levelSelectTitle.active = false;
         this.gameplayPanel.active = false;
+        this.allLevelsCompleted.active = false;
 
-        for (let index = 0; index < this.levelsData.levelsData.length; index++) {
-            //console.log("levels");
-            let newLevelSelectUI = instantiate(this.levelSelectPrefab);
-            newLevelSelectUI.parent = this.allLevelsUIParent.node;
-            newLevelSelectUI.getComponent(SingleLevelUiManager).setup(index);
-        }
+      
 
 
 
@@ -73,17 +78,47 @@ export class GameManager extends Component {
          // console.log("hi");
           this.gameTitle.active = false;
           this.playBtn.active = false;
-          this.levelSelectPanel.active = true;
-          this.levelSelectTitle.active = true;
+         
+      
+          this.createLevelSelectButtons();
     }
 
     
 
     menuBtnClicked() {
-        this.levelSelectPanel.active = true;
-         this.levelSelectTitle.active = true;
+       
          this.gameplayPanel.active = false;
+         this.createLevelSelectButtons();
     }
+
+
+    createLevelSelectButtons(){
+        this.levelSelectPanel.active = true;
+        this.levelSelectTitle.active = true;
+        this.allLevelsUIParent.node.destroyAllChildren();
+
+          for (let index = 0; index < this.levelsData.levelsData.length; index++) {
+            //console.log("levels");
+            let newLevelSelectUI = instantiate(this.levelSelectPrefab);
+            newLevelSelectUI.parent = this.allLevelsUIParent.node;
+            newLevelSelectUI.getComponent(SingleLevelUiManager).setup(index, this.isUnlocked(index));
+            }
+    }
+
+
+    isUnlocked(levelNum: number){
+        console.log(localStorage.getItem("level"+levelNum));
+        if(levelNum==0){
+            return true;
+        }
+
+        if(localStorage.getItem("level"+levelNum)==null){
+            return false;
+        }
+       
+        return true;
+    }
+
 
     openGameLevel(levelNum: number) {
 
@@ -114,7 +149,11 @@ export class GameManager extends Component {
 
         this.levelSelectPanel.active = false;
         this.levelSelectTitle.active = false;
+        this.allLevelsCompleted.active = false;
         this.gameplayPanel.active = true;
+        this.gamePieceLayout.node.active = true;
+        this.gameLevelTitle.node.active = true;
+        this.allLevelsCompleted.active = false;
     }
 
 
@@ -126,7 +165,21 @@ export class GameManager extends Component {
         });
         if(allCorrect){
             console.log("LEVEL COMPLETED!");
-            this.openGameLevel(this.currentLevel+1);
+           
+
+
+            if(this.levelsData.levelsData.length ==this.currentLevel+1 ) {
+                this.gamePieceLayout.node.active = false;
+                this.gameLevelTitle.node.active = false;
+                this.allLevelsCompleted.active = true;
+            }
+            else {
+                let a = this.currentLevel+1;
+                console.log(a);
+                localStorage.setItem("level"+a,"ready");
+                this.openGameLevel(this.currentLevel+1);
+            }
+           
         }
     }
 
