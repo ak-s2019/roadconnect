@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, Label, CCString, CCInteger, find, Button, Sprite, color } from 'cc';
 import { GameManager } from './GameManager';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('SingleLevelUiManager')
@@ -14,11 +15,10 @@ export class SingleLevelUiManager extends Component {
     private prefabLevel: number;
 
 
-    @property({type: GameManager})
-    private gameManager: GameManager;
+ 
 
     start() {
-        this.gameManager = find("GameManager").getComponent(GameManager);
+        
        // this.setup(5);
     }
 
@@ -37,7 +37,7 @@ export class SingleLevelUiManager extends Component {
     }
 
     openLevel() {
-        this.gameManager.openGameLevel(this.prefabLevel);
+        find("GameManager").getComponent(GameManager).openGameLevel(this.prefabLevel);
     }
 }
 
